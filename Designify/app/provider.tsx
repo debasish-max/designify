@@ -1,10 +1,11 @@
 "use client"
 import { UserDetailContext } from '@/context/UserDetailContext';
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import Header, { User, } from './_components/Header';
 import { CartContext } from '@/context/CartContext';
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import { usePathname } from 'next/navigation';
+import axios from 'axios';
 
 function Provider({
   children,
@@ -17,6 +18,41 @@ function Provider({
   const isAdminPath = pathname.startsWith('/admin');
   const isCustomizePath = pathname.includes('/customize');
   const shouldApplyPadding = !isAdminPath && !isCustomizePath;
+
+  useEffect(() => {
+    const initAuth = async () => {
+      try {
+        const tokenStr = localStorage.getItem('tokenResponse');
+        if (tokenStr) {
+          const tokenResponse = JSON.parse(tokenStr);
+          if (tokenResponse?.access_token) {
+            const userInfo = await axios.get(
+              'https://www.googleapis.com/oauth2/v3/userinfo',
+              { headers: { Authorization: 'Bearer ' + tokenResponse.access_token } }
+            );
+            const dbUser = await axios.post('/api/users', {
+              name: userInfo.data.name,
+              email: userInfo.data.email,
+              picture: userInfo.data.picture
+            });
+            setUserDetail(dbUser.data);
+            
+            // Load cart
+            const cartResult = await axios.get('/api/cart?email=' + userInfo.data.email);
+            setCart(cartResult.data);
+            return;
+          }
+        }
+      } catch (e) {
+        console.error('Auth initialization error:', e);
+      }
+      setUserDetail(null as any); // Set to null to indicate loaded but not authenticated
+    };
+
+    if (typeof window !== 'undefined') {
+      initAuth();
+    }
+  }, []);
 
   return (
     <GoogleOAuthProvider clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID!}>

@@ -110,7 +110,7 @@ function AdminCategories() {
                             </div>
                         </div>
                         <div className="relative">
-                            <button 
+                            <button
                                 onClick={(e) => {
                                     e.stopPropagation();
                                     setActiveDropdownId(activeDropdownId === cat.id ? null : cat.id);
@@ -119,12 +119,12 @@ function AdminCategories() {
                             >
                                 <MoreHorizontal size={20} />
                             </button>
-                            
+
                             {activeDropdownId === cat.id && (
                                 <>
                                     <div className="fixed inset-0 z-10" onClick={() => setActiveDropdownId(null)}></div>
                                     <div className="absolute right-0 mt-2 w-48 bg-white rounded-2xl shadow-xl border border-gray-100 py-2 z-20 animate-in fade-in zoom-in-95 duration-200">
-                                        <button 
+                                        <button
                                             onClick={() => {
                                                 router.push(`/admin/products?category=${cat.name}`);
                                                 setActiveDropdownId(null);
@@ -133,7 +133,7 @@ function AdminCategories() {
                                         >
                                             <ExternalLink size={14} /> View products
                                         </button>
-                                        <button 
+                                        <button
                                             onClick={() => {
                                                 setCurrentCategory(cat);
                                                 setIsModalOpen(true);
@@ -144,7 +144,7 @@ function AdminCategories() {
                                             <Pencil size={14} /> Edit Taxonomy
                                         </button>
                                         <div className="h-px bg-gray-50 my-1"></div>
-                                        <button 
+                                        <button
                                             onClick={() => {
                                                 handleDelete(cat.id);
                                                 setActiveDropdownId(null);
@@ -174,7 +174,7 @@ function AdminCategories() {
                         <form onSubmit={handleSave} className="flex flex-col gap-6">
                             <div className="flex flex-col gap-2">
                                 <label className="text-xs font-black text-gray-400 uppercase tracking-widest ml-1">Category Name</label>
-                                <Input required className="rounded-2xl py-6 font-bold bg-gray-50 border-gray-100 focus:bg-white transition-all shadow-inner" value={currentCategory?.name} onChange={e => setCurrentCategory({...currentCategory, name: e.target.value, slug: e.target.value.toLowerCase().replace(/ /g, '-')})} placeholder="e.g. Graphic Tees" />
+                                <Input required className="rounded-2xl py-6 font-bold bg-gray-50 border-gray-100 focus:bg-white transition-all shadow-inner" value={currentCategory?.name} onChange={e => setCurrentCategory({ ...currentCategory, name: e.target.value, slug: e.target.value.toLowerCase().replace(/ /g, '-') })} placeholder="e.g. Graphic Tees" />
                             </div>
                             <div className="flex flex-col gap-2">
                                 <label className="text-xs font-black text-gray-400 uppercase tracking-widest ml-1">URL Slug</label>
@@ -197,7 +197,7 @@ function AdminCategories() {
                                     <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">Requires both design uploads</span>
                                 </div>
                                 <label className="relative inline-flex items-center cursor-pointer">
-                                    <input type="checkbox" checked={currentCategory?.hasFrontAndBack || false} onChange={e => setCurrentCategory({...currentCategory, hasFrontAndBack: e.target.checked})} className="sr-only peer" />
+                                    <input type="checkbox" checked={currentCategory?.hasFrontAndBack || false} onChange={e => setCurrentCategory({ ...currentCategory, hasFrontAndBack: e.target.checked })} className="sr-only peer" />
                                     <div className="w-12 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
                                 </label>
                             </div>

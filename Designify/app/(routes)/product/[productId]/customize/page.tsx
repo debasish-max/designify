@@ -38,6 +38,8 @@ export default function CustomizePage() {
     const [variantStartIndex, setVariantStartIndex] = useState(0);
     const [currentSide, setCurrentSide] = useState<'front' | 'back'>('front');
     const [category, setCategory] = useState<any>(null);
+    const [viewMode, setViewMode] = useState<'edit' | 'preview'>('edit');
+    const [previewUrl, setPreviewUrl] = useState<string>('');
 
     // Fetch Product Data
     useEffect(() => {
@@ -64,34 +66,43 @@ export default function CustomizePage() {
         }
     }
 
-    // Initialize Canvas
+    // Initialize & Resize Canvas
     useEffect(() => {
-        if (!loading && canvasRef.current && !canvas) {
-            const initCanvas = new Canvas(canvasRef.current, {
-                width: 500,
-                height: 500,
-                backgroundColor: 'transparent',
-            });
-            
-            initCanvas.on('selection:created', (e) => setSelectedObject(e.selected[0]));
-            initCanvas.on('selection:updated', (e) => setSelectedObject(e.selected[0]));
-            initCanvas.on('selection:cleared', () => setSelectedObject(null));
-            
-            initCanvas.on('object:added', () => updateLayers(initCanvas));
-            initCanvas.on('object:removed', () => updateLayers(initCanvas));
-            initCanvas.on('object:modified', () => {
-                updateLayers(initCanvas);
+        if (!loading && canvasRef.current && product) {
+            const activePrintArea = currentSide === 'front' 
+                ? (product.printAreaFront || { x: 0, y: 0, width: 100, height: 100 })
+                : (product.printAreaBack || { x: 0, y: 0, width: 100, height: 100 });
+
+            // Calculate pixel dimensions based on the 500x500 parent container
+            const canvasWidth = (activePrintArea.width / 100) * 500;
+            const canvasHeight = (activePrintArea.height / 100) * 500;
+
+            if (!canvas) {
+                const initCanvas = new Canvas(canvasRef.current, {
+                    width: canvasWidth,
+                    height: canvasHeight,
+                    backgroundColor: 'transparent',
+                });
+                
+                initCanvas.on('selection:created', (e) => setSelectedObject(e.selected[0]));
+                initCanvas.on('selection:updated', (e) => setSelectedObject(e.selected[0]));
+                initCanvas.on('selection:cleared', () => setSelectedObject(null));
+                
+                initCanvas.on('object:added', () => updateLayers(initCanvas));
+                initCanvas.on('object:removed', () => updateLayers(initCanvas));
+                initCanvas.on('object:modified', () => {
+                    updateLayers(initCanvas);
+                    saveToHistory(initCanvas);
+                });
+
+                setCanvas(initCanvas);
                 saveToHistory(initCanvas);
-            });
-
-            setCanvas(initCanvas);
-            saveToHistory(initCanvas);
-
-            return () => {
-                initCanvas.dispose();
+            } else {
+                canvas.setDimensions({ width: canvasWidth, height: canvasHeight });
+                canvas.renderAll();
             }
         }
-    }, [loading]);
+    }, [loading, product, currentSide]);
 
     const updateLayers = (c: Canvas) => {
         const objects = c.getObjects().map((obj, i) => ({
@@ -110,6 +121,13 @@ export default function CustomizePage() {
             return [...newHistory, json];
         });
         setHistoryIndex(prev => prev + 1);
+        
+        // Update live preview
+        try {
+            setPreviewUrl(c.toDataURL({ format: 'png', multiplier: 2 }));
+        } catch (e) {
+            console.error("Failed to generate preview", e);
+        }
     };
 
     // Tool Handlers
@@ -161,7 +179,7 @@ export default function CustomizePage() {
             const imageUrl = result.data.url;
 
             if (imageUrl) {
-                const img = await FabricImage.fromURL(imageUrl);
+                const img = await FabricImage.fromURL(imageUrl, { crossOrigin: 'anonymous' });
                 img.scale(0.2); // Initial scale
                 canvas.add(img);
                 canvas.centerObject(img);
@@ -192,7 +210,7 @@ export default function CustomizePage() {
             newUrl += `?tr=${transformation}`;
         }
 
-        const newImg = await FabricImage.fromURL(newUrl);
+        const newImg = await FabricImage.fromURL(newUrl, { crossOrigin: 'anonymous' });
         newImg.set({
             left: activeObj.left,
             top: activeObj.top,
@@ -327,8 +345,17 @@ export default function CustomizePage() {
 
                 <div className="flex items-center gap-3">
                     <div className="bg-gray-100 p-1 rounded-xl flex">
-                        <Button variant="ghost" size="sm" className="bg-white shadow-sm rounded-lg text-xs font-bold px-4">Edit</Button>
-                        <Button variant="ghost" size="sm" className="text-gray-400 text-xs font-bold px-4">Preview</Button>
+                        <Button variant="ghost" size="sm" onClick={() => setViewMode('edit')} className={`${viewMode === 'edit' ? 'bg-white shadow-sm text-gray-900' : 'text-gray-400 hover:bg-gray-200'} rounded-lg text-xs font-bold px-4 transition-all`}>Edit</Button>
+                        <Button variant="ghost" size="sm" onClick={() => {
+                            try {
+                                if (canvas) {
+                                    setPreviewUrl(canvas.toDataURL({ format: 'png', multiplier: 2 }));
+                                }
+                            } catch (e) {
+                                console.error("Failed to generate preview", e);
+                            }
+                            setViewMode('preview');
+                        }} className={`${viewMode === 'preview' ? 'bg-white shadow-sm text-gray-900' : 'text-gray-400 hover:bg-gray-200'} rounded-lg text-xs font-bold px-4 transition-all`}>Preview</Button>
                     </div>
                     <Button variant="ghost" size="icon" className="rounded-xl border border-gray-100 text-gray-400"><Palette size={20}/></Button>
                 </div>
@@ -437,37 +464,40 @@ export default function CustomizePage() {
                 <main className="flex-1 relative flex items-center justify-center p-12 bg-[#F3F4F6] overflow-hidden">
                     <div className="absolute inset-0 opacity-[0.03] pointer-events-none" style={{ backgroundImage: 'radial-gradient(#000 1px, transparent 1px)', backgroundSize: '24px 24px' }}></div>
                     
-                    {/* Sticky Side Images (Variants) */}
-                    <div className="absolute left-8 top-1/2 -translate-y-1/2 flex flex-col items-center gap-3 z-30">
-                        {product?.productImage && product.productImage.length > 5 && variantStartIndex > 0 && (
-                            <Button variant="ghost" size="icon" onClick={() => setVariantStartIndex(prev => prev - 1)} className="h-8 w-8 bg-white/80 backdrop-blur-md rounded-full shadow-sm"><ChevronUp size={16}/></Button>
-                        )}
-                        <div className="flex flex-col gap-3">
-                            {product?.productImage?.slice(variantStartIndex, variantStartIndex + 5).map((img: any, i: number) => {
-                                const actualIndex = variantStartIndex + i;
-                                return (
-                                    <div 
-                                        key={actualIndex}
-                                        onClick={() => setSelectedVariant(actualIndex)}
-                                        className={`w-16 h-16 rounded-xl border-2 transition-all cursor-pointer bg-white shadow-sm overflow-hidden flex items-center justify-center group ${selectedVariant === actualIndex ? 'border-primary ring-4 ring-primary/10' : 'border-transparent hover:border-gray-200'}`}
-                                    >
-                                        <Image src={img.url} alt={`Variant ${actualIndex}`} width={60} height={60} className="w-4/5 h-4/5 object-contain group-hover:scale-110 transition-transform" />
-                                    </div>
-                                )
-                            })}
+                    {/* Sticky Side Images (Variants) - ONLY IN PREVIEW MODE */}
+                    {viewMode === 'preview' && (
+                        <div className="absolute left-8 top-1/2 -translate-y-1/2 flex flex-col items-center gap-3 z-30">
+                            {product?.productImage && product.productImage.length > 5 && variantStartIndex > 0 && (
+                                <Button variant="ghost" size="icon" onClick={() => setVariantStartIndex(prev => prev - 1)} className="h-8 w-8 bg-white/80 backdrop-blur-md rounded-full shadow-sm"><ChevronUp size={16}/></Button>
+                            )}
+                            <div className="flex flex-col gap-3">
+                                {product?.productImage?.slice(variantStartIndex, variantStartIndex + 5).map((img: any, i: number) => {
+                                    const actualIndex = variantStartIndex + i;
+                                    return (
+                                        <div 
+                                            key={actualIndex}
+                                            onClick={() => setSelectedVariant(actualIndex)}
+                                            className={`w-16 h-16 rounded-xl border-2 transition-all cursor-pointer bg-white shadow-sm overflow-hidden flex items-center justify-center group ${selectedVariant === actualIndex ? 'border-primary ring-4 ring-primary/10' : 'border-transparent hover:border-gray-200'}`}
+                                        >
+                                            <Image src={img.url} alt={`Variant ${actualIndex}`} width={60} height={60} className="w-4/5 h-4/5 object-contain group-hover:scale-110 transition-transform" />
+                                        </div>
+                                    )
+                                })}
+                            </div>
+                            {product?.productImage && product.productImage.length > 5 && variantStartIndex + 5 < product.productImage.length && (
+                                <Button variant="ghost" size="icon" onClick={() => setVariantStartIndex(prev => prev + 1)} className="h-8 w-8 bg-white/80 backdrop-blur-md rounded-full shadow-sm"><ChevronDown size={16}/></Button>
+                            )}
                         </div>
-                        {product?.productImage && product.productImage.length > 5 && variantStartIndex + 5 < product.productImage.length && (
-                            <Button variant="ghost" size="icon" onClick={() => setVariantStartIndex(prev => prev + 1)} className="h-8 w-8 bg-white/80 backdrop-blur-md rounded-full shadow-sm"><ChevronDown size={16}/></Button>
-                        )}
-                    </div>
+                    )}
 
-                    <div className="relative group transition-all duration-700">
-                        {/* Shadow underneath */}
-                        <div className="absolute -bottom-10 left-1/2 -translate-x-1/2 w-4/5 h-10 bg-black/10 blur-3xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                    <div className="relative group transition-all duration-700 flex items-center justify-center w-full h-full">
                         
-                        {/* The Mockup Base */}
-                        <div className="relative rounded-[40px] bg-white shadow-[0_50px_100px_-20px_rgba(0,0,0,0.1)] p-4 border border-white overflow-hidden">
-                            <div className="w-[500px] h-[500px] flex items-center justify-center relative bg-[#fff]">
+                        {/* EDIT MODE CONTAINER */}
+                        <div className={`relative ${viewMode === 'edit' ? 'flex' : 'hidden'} items-center justify-center flex-col`}>
+                            {/* Shadow underneath */}
+                            <div className="absolute -bottom-10 left-1/2 -translate-x-1/2 w-4/5 h-10 bg-black/10 blur-3xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                            
+                            <div className="w-[500px] h-[500px] relative flex items-center justify-center overflow-hidden bg-gray-50 rounded-xl">
                                 { (currentSide === 'front' ? product?.mockup2dFront : product?.mockup2dBack) && (
                                     <Image 
                                         src={(currentSide === 'front' ? product?.mockup2dFront : product?.mockup2dBack) as string} 
@@ -477,10 +507,57 @@ export default function CustomizePage() {
                                         className="w-full h-full object-contain pointer-events-none" 
                                     />
                                 )}
-                                <canvas
-                                    ref={canvasRef}
-                                    className="absolute inset-0 z-10 rounded-[32px] cursor-crosshair"
-                                />
+                                {(() => {
+                                    const activePrintArea = currentSide === 'front' 
+                                        ? (product?.printAreaFront || { x: 0, y: 0, width: 100, height: 100 })
+                                        : (product?.printAreaBack || { x: 0, y: 0, width: 100, height: 100 });
+                                    
+                                    return (
+                                        <div 
+                                            className="absolute z-10 flex items-center justify-center border-2 border-dashed border-primary"
+                                            style={{
+                                                left: `${activePrintArea.x}%`,
+                                                top: `${activePrintArea.y}%`,
+                                                width: `${activePrintArea.width}%`,
+                                                height: `${activePrintArea.height}%`
+                                            }}
+                                        >
+                                            <canvas ref={canvasRef} className="cursor-crosshair w-full h-full" />
+                                        </div>
+                                    )
+                                })()}
+                            </div>
+                        </div>
+
+                        {/* PREVIEW MODE CONTAINER */}
+                        <div className={`relative ${viewMode === 'preview' ? 'flex' : 'hidden'} w-[600px] h-[600px] items-center justify-center bg-white rounded-[32px] shadow-2xl p-4 transition-all overflow-hidden`}>
+                            <div className="relative w-full h-full flex items-center justify-center">
+                                {product?.productImage?.[selectedVariant] && (
+                                    <img 
+                                        src={product.productImage[selectedVariant].url}
+                                        alt="Preview"
+                                        className="w-full h-full object-contain"
+                                    />
+                                )}
+                                {/* Overlay Design */}
+                                {previewUrl && (
+                                    <div 
+                                        className="absolute pointer-events-none z-20 flex items-center justify-center"
+                                        style={{
+                                            left: `${product?.productImage?.[selectedVariant]?.overlayX ?? 25}%`,
+                                            top: `${product?.productImage?.[selectedVariant]?.overlayY ?? 25}%`,
+                                            width: `${product?.productImage?.[selectedVariant]?.overlayWidth ?? 50}%`,
+                                            height: `${product?.productImage?.[selectedVariant]?.overlayHeight ?? 50}%`,
+                                            mixBlendMode: 'multiply'
+                                        }}
+                                    >
+                                        <img 
+                                            src={previewUrl} 
+                                            alt="Live Design Overlay"
+                                            className="w-full h-full object-fill"
+                                        />
+                                    </div>
+                                )}
                             </div>
                         </div>
                     </div>
