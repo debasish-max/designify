@@ -62,17 +62,12 @@ function Header() {
   const debounceRef = useRef<NodeJS.Timeout | null>(null)
 
   useEffect(() => {
-    if (typeof window !== undefined) {
-      try {
-        //@ts-ignore
-        const tokenResponse = JSON.parse(localStorage?.getItem('tokenResponse') ?? '{}');
-        if (tokenResponse) {
-          GetUserProfile(tokenResponse?.access_token);
-        }
-      }
-      catch (e) { }
+    if (userDetail) {
+      setUser(userDetail);
+    } else if (userDetail === null) {
+      setUser(undefined);
     }
-  }, [])
+  }, [userDetail])
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -177,11 +172,6 @@ function Header() {
       if (dbUser) {
         setUser(dbUser) // Sync local state
         setUserDetail(dbUser) // Sync global context
-        
-        if (dbUser.role === 'admin') {
-          router.push('/admin')
-        }
-
         if (showToast) {
           toast.success(`Welcome back, ${dbUser.name} 👋`, {
             position: "top-right",
@@ -209,15 +199,7 @@ function Header() {
     }
   }
 
-  useEffect(() => {
-    user && GetCartList();
-  }, [user])
 
-  const GetCartList = async () => {
-    const result = await axios.get('/api/cart?email=' + user?.email);
-    console.log(result.data);
-    setCart(result.data);
-  }
 
   const handleLogout = () => {
     localStorage.removeItem('tokenResponse')

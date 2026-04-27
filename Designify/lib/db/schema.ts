@@ -31,6 +31,8 @@ export const ProductsTable = pgTable("products", {
   sizes: jsonb("sizes"), // Array of sizes e.g. ["S", "M", "L"]
   mockup2dFront: text("mockup_2d_front"), // URL for Front 2D mockup design
   mockup2dBack: text("mockup_2d_back"), // URL for Back 2D mockup design
+  printAreaFront: jsonb("print_area_front"), // { x: number, y: number, width: number, height: number }
+  printAreaBack: jsonb("print_area_back"), // { x: number, y: number, width: number, height: number }
 });
 
 export const CartTable = pgTable("cart", {

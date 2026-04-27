@@ -28,6 +28,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
               ? "border-red-500 focus:ring-red-500"
               : "border-gray-300",
             "disabled:bg-gray-100 disabled:cursor-not-allowed",
+            type === "number" && "[&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none [-moz-appearance:textfield]",
             className
           )}
           ref={ref}
