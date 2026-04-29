@@ -5,36 +5,38 @@ import Link from 'next/link'
 import React, { useEffect, useState } from 'react'
 
 type Category = {
-    name: string,
-    image: {
-        url: string
-    },
-    id: number,
-    slug: string
+  name: string,
+  image: {
+    url: string
+  },
+  id: number,
+  slug: string
 }
 function Categories() {
 
-    const [categoryList, setCategoryList] = useState<Category[]>();
-    
-    useEffect(() => {
-        GetCategoryList();
-    },[])
+  const [categoryList, setCategoryList] = useState<Category[]>();
 
-   const GetCategoryList = async () => {
-        const result = await axios.get('/api/categories');
-        setCategoryList(result?.data)
-   } 
+  useEffect(() => {
+    GetCategoryList();
+  }, [])
+
+  const GetCategoryList = async () => {
+    const result = await axios.get('/api/categories');
+    setCategoryList(result?.data)
+  }
 
   return (
-    <div>
-      <h2 className='font-bold text-2xl'>Popular Categories</h2>
+    <div className="mt-10 px-5">
+      <h2 className='font-black text-3xl text-gray-900 tracking-tighter mb-8'>Shop by Category</h2>
 
-      <div className='grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-5 mt-5 '>
-        {categoryList?.map((category:Category, index:number) => (
-            <Link href={'/category/' + category?.slug} key={category.id} className='p-4 border rounded-lg flex flex-col items-center hover:bg-fuchsia-100 cursor-pointer shadow-md hover:shadow-lg transition-shadow duration-300'>
-                {category?.image?.url && <Image src={category.image.url} width={80} height={80} alt={category.name}/>}
-                <h2 className='text-lg font-medium'>{category?.name}</h2>
-            </Link>
+      <div className='grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6'>
+        {categoryList?.map((category: Category, index: number) => (
+          <Link href={'/products?category=' + encodeURIComponent(category?.name)} key={category.id} className='group p-6 bg-white border border-gray-100 rounded-[32px] flex flex-col items-center justify-center gap-5 hover:border-primary hover:shadow-xl hover:shadow-primary/5 hover:-translate-y-2 transition-all duration-500 cursor-pointer'>
+            <div className="w-20 h-20 flex items-center justify-center group-hover:scale-110 transition-transform duration-500">
+              {category?.image?.url && <Image src={category.image.url} width={80} height={80} alt={category.name} className="w-full h-full object-contain" />}
+            </div>
+            <h2 className='text-sm font-black text-gray-900 uppercase tracking-widest'>{category?.name}</h2>
+          </Link>
         ))}
       </div>
     </div>

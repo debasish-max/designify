@@ -30,19 +30,21 @@ function AdminDashboard() {
         totalRevenue: 0,
         totalOrders: 0,
         totalProducts: 0,
+        totalUsers: 0,
         recentOrders: [],
         monthlyRevenue: [],
         categoryDistribution: []
     })
     const [loading, setLoading] = useState(true)
+    const [timeframe, setTimeframe] = useState('Monthly')
 
     useEffect(() => {
         GetStats()
-    }, [])
+    }, [timeframe])
 
     const GetStats = async () => {
         try {
-            const result = await axios.get('/api/admin/stats')
+            const result = await axios.get(`/api/admin/stats?timeframe=${timeframe.toLowerCase()}`)
             setStats(result.data)
         } catch (e) {
             console.error('Stats error:', e)
@@ -87,9 +89,19 @@ function AdminDashboard() {
                     <h1 className="text-4xl font-black text-gray-900 tracking-tighter">Business Dashboard</h1>
                 </div>
                 <div className="flex gap-3 bg-white p-1.5 rounded-2xl shadow-sm border border-gray-100">
-                    <button className="px-5 py-2.5 rounded-xl bg-gray-50 text-sm font-bold text-gray-600 hover:bg-gray-100 transition">Weekly</button>
-                    <button className="px-5 py-2.5 rounded-xl bg-primary text-white text-sm font-bold shadow-md shadow-primary/20">Monthly</button>
-                    <button className="px-5 py-2.5 rounded-xl bg-gray-50 text-sm font-bold text-gray-600 hover:bg-gray-100 transition">Yearly</button>
+                    {['Weekly', 'Monthly', 'Yearly'].map(t => (
+                        <button 
+                            key={t}
+                            onClick={() => setTimeframe(t)}
+                            className={`px-5 py-2.5 rounded-xl text-sm font-bold transition ${
+                                timeframe === t 
+                                ? 'bg-primary text-white shadow-md shadow-primary/20' 
+                                : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
+                            }`}
+                        >
+                            {t}
+                        </button>
+                    ))}
                 </div>
             </div>
 
@@ -98,7 +110,7 @@ function AdminDashboard() {
                 <StatCard title="Overall Revenue" value={`₹${stats.totalRevenue.toLocaleString()}`} icon={DollarSign} trend trendValue="24" isPositive />
                 <StatCard title="Active Orders" value={stats.totalOrders} icon={ShoppingCart} trend trendValue="12" isPositive />
                 <StatCard title="Total Inventory" value={stats.totalProducts} icon={Package} />
-                <StatCard title="Store Visitors" value="1,248" icon={User} trend trendValue="8" isPositive={false} />
+                <StatCard title="Store Visitors" value={stats.totalUsers} icon={User} trend trendValue="8" isPositive={false} />
             </div>
 
             {/* Visualization Grid */}
@@ -110,7 +122,6 @@ function AdminDashboard() {
                             <h3 className="text-xl font-black text-gray-900 tracking-tight">Revenue Growth</h3>
                             <p className="text-sm font-bold text-gray-400 uppercase tracking-widest mt-1">2026 Performance Metrics</p>
                         </div>
-                        <button className="p-3 hover:bg-gray-50 rounded-xl transition text-gray-400"><MoreVertical size={20} /></button>
                     </div>
                     <div className="h-[350px] w-full">
                         <ResponsiveContainer width="100%" height="100%">
@@ -138,7 +149,6 @@ function AdminDashboard() {
                 <div className="bg-white p-8 rounded-[40px] border border-gray-100 shadow-sm flex flex-col gap-8">
                     <div className="flex justify-between items-center px-2">
                          <h3 className="text-xl font-black text-gray-900 tracking-tight">Sales by Category</h3>
-                         <button className="p-3 hover:bg-gray-50 rounded-xl transition text-gray-400"><MoreVertical size={20} /></button>
                     </div>
                     
                     <div className="h-[250px] relative">

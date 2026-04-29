@@ -7,6 +7,8 @@ import { GoogleOAuthProvider } from '@react-oauth/google';
 import { usePathname } from 'next/navigation';
 import axios from 'axios';
 
+import { socket } from '@/lib/socket';
+
 function Provider({
   children,
 }: Readonly<{
@@ -18,6 +20,21 @@ function Provider({
   const isAdminPath = pathname.startsWith('/admin');
   const isCustomizePath = pathname.includes('/customize');
   const shouldApplyPadding = !isAdminPath && !isCustomizePath;
+
+  useEffect(() => {
+    if (userDetail?.email) {
+      if (!socket.connected) {
+        socket.connect();
+      }
+      socket.emit('user_connected', userDetail.email);
+    }
+
+    return () => {
+      // Only disconnect on unmount if we want to be strict, 
+      // but in Dev mode this triggers on every HMR.
+      // Let's keep it for production safety.
+    }
+  }, [userDetail?.email]);
 
   useEffect(() => {
     const initAuth = async () => {

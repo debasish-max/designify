@@ -306,44 +306,6 @@ function AdminProducts() {
                                                 <Trash2 size={18} className="stroke-[2.5]" />
                                             </button>
 
-                                            <div className="relative">
-                                                <button
-                                                    onClick={(e) => {
-                                                        e.stopPropagation();
-                                                        setActiveDropdownId(activeDropdownId === product.id ? null : product.id);
-                                                    }}
-                                                    className={`p-3 rounded-xl transition duration-300 ${activeDropdownId === product.id ? 'bg-primary text-white shadow-lg' : 'text-gray-400 hover:bg-gray-100'}`}
-                                                >
-                                                    <MoreHorizontal size={18} />
-                                                </button>
-
-                                                {activeDropdownId === product.id && (
-                                                    <>
-                                                        <div className="fixed inset-0 z-40" onClick={() => setActiveDropdownId(null)}></div>
-                                                        <div className="absolute right-0 mt-2 w-48 bg-white rounded-2xl shadow-xl border border-gray-100 py-2 z-50 animate-in fade-in zoom-in-95 duration-200 text-left">
-                                                            <button
-                                                                onClick={() => { setCurrentProduct(product); setIsModalOpen(true); setActiveDropdownId(null); }}
-                                                                className="w-full text-left px-4 py-2.5 text-xs font-bold text-gray-600 hover:bg-primary/5 hover:text-primary flex items-center gap-2"
-                                                            >
-                                                                <Pencil size={14} /> Quick Edit
-                                                            </button>
-                                                            <button
-                                                                onClick={() => { /* View on store logic */ setActiveDropdownId(null); }}
-                                                                className="w-full text-left px-4 py-2.5 text-xs font-bold text-gray-600 hover:bg-primary/5 hover:text-primary flex items-center gap-2"
-                                                            >
-                                                                <ExternalLink size={14} /> View in Store
-                                                            </button>
-                                                            <div className="h-px bg-gray-50 my-1"></div>
-                                                            <button
-                                                                onClick={() => { handleDelete(product.id); setActiveDropdownId(null); }}
-                                                                className="w-full text-left px-4 py-2.5 text-xs font-bold text-red-600 hover:bg-red-50 flex items-center gap-2"
-                                                            >
-                                                                <Trash2 size={14} /> Delete Product
-                                                            </button>
-                                                        </div>
-                                                    </>
-                                                )}
-                                            </div>
                                         </div>
                                     </td>
                                 </tr>

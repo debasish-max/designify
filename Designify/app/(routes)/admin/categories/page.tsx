@@ -90,17 +90,19 @@ function AdminCategories() {
                 </Button>
             </header>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 px-2">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 px-2">
                 {loading ? (
                     <div className="col-span-full py-32 text-center text-gray-300">
                         <Loader2 className="w-10 h-10 animate-spin mx-auto mb-4 opacity-20" />
                         <p className="font-black uppercase tracking-widest text-xs">Syncing Categories...</p>
                     </div>
                 ) : categories.length > 0 ? categories.map((cat: any) => (
-                    <div key={cat.id} className="bg-white p-6 rounded-[35px] border border-gray-100 shadow-sm flex items-center gap-5 group hover:shadow-xl hover:shadow-primary/5 transition-all relative">
-                        <div className="w-20 h-20 bg-gray-50 rounded-2xl border border-gray-100 flex items-center justify-center overflow-hidden relative shadow-inner group-hover:scale-105 transition-transform">
-                            {cat.image?.url ? <Image src={cat.image.url} alt={cat.name} fill className="object-contain p-3" /> : <Layers className="text-gray-200" size={32} />}
-                        </div>
+                    <div key={cat.id} className="bg-white p-6 rounded-[35px] border border-gray-100 shadow-sm flex items-center gap-5 group hover:shadow-xl hover:shadow-primary/5 transition-all">
+                        {cat.image?.url ? (
+                            <Image src={cat.image.url} alt={cat.name} width={80} height={80} className="object-contain group-hover:scale-105 transition-transform" />
+                        ) : (
+                            <Layers className="text-gray-200 group-hover:scale-105 transition-transform" size={40} />
+                        )}
                         <div className="flex-1 min-w-0">
                             <h3 className="font-black text-gray-900 text-lg leading-none mb-1 truncate">{cat.name}</h3>
                             <p className="text-[10px] font-black text-primary uppercase tracking-widest leading-none mb-3">Slug: {cat.slug}</p>
@@ -108,54 +110,6 @@ function AdminCategories() {
                                 <button onClick={() => { setCurrentCategory(cat); setIsModalOpen(true); }} className="p-2.5 bg-gray-50 text-gray-400 hover:bg-primary/10 hover:text-primary rounded-xl transition shadow-sm"><Pencil size={14} /></button>
                                 <button onClick={() => handleDelete(cat.id)} className="p-2.5 bg-gray-50 text-gray-400 hover:bg-red-50 hover:text-red-500 rounded-xl transition shadow-sm"><Trash2 size={14} /></button>
                             </div>
-                        </div>
-                        <div className="relative">
-                            <button
-                                onClick={(e) => {
-                                    e.stopPropagation();
-                                    setActiveDropdownId(activeDropdownId === cat.id ? null : cat.id);
-                                }}
-                                className="p-2 hover:bg-gray-50 rounded-xl transition text-gray-300 hover:text-primary"
-                            >
-                                <MoreHorizontal size={20} />
-                            </button>
-
-                            {activeDropdownId === cat.id && (
-                                <>
-                                    <div className="fixed inset-0 z-10" onClick={() => setActiveDropdownId(null)}></div>
-                                    <div className="absolute right-0 mt-2 w-48 bg-white rounded-2xl shadow-xl border border-gray-100 py-2 z-20 animate-in fade-in zoom-in-95 duration-200">
-                                        <button
-                                            onClick={() => {
-                                                router.push(`/admin/products?category=${cat.name}`);
-                                                setActiveDropdownId(null);
-                                            }}
-                                            className="w-full text-left px-4 py-2 text-xs font-bold text-gray-600 hover:bg-primary/5 hover:text-primary flex items-center gap-2"
-                                        >
-                                            <ExternalLink size={14} /> View products
-                                        </button>
-                                        <button
-                                            onClick={() => {
-                                                setCurrentCategory(cat);
-                                                setIsModalOpen(true);
-                                                setActiveDropdownId(null);
-                                            }}
-                                            className="w-full text-left px-4 py-2 text-xs font-bold text-gray-600 hover:bg-primary/5 hover:text-primary flex items-center gap-2"
-                                        >
-                                            <Pencil size={14} /> Edit Taxonomy
-                                        </button>
-                                        <div className="h-px bg-gray-50 my-1"></div>
-                                        <button
-                                            onClick={() => {
-                                                handleDelete(cat.id);
-                                                setActiveDropdownId(null);
-                                            }}
-                                            className="w-full text-left px-4 py-2 text-xs font-bold text-red-600 hover:bg-red-50 flex items-center gap-2"
-                                        >
-                                            <Trash2 size={14} /> Delete Permanent
-                                        </button>
-                                    </div>
-                                </>
-                            )}
                         </div>
                     </div>
                 )) : (

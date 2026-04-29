@@ -11,19 +11,23 @@ import React, { Suspense, useEffect, useState } from 'react'
 function ProductsPageContent() {
   const searchParams = useSearchParams();
   const searchQuery = searchParams.get('search') || '';
+  const categoryQuery = searchParams.get('category') || '';
   const [loading, setLoading] = useState(true);
   const [productList, setProductList] = useState<Product[]>([]);
 
   useEffect(() => {
     fetchProducts();
-  }, [searchQuery])
+  }, [searchQuery, categoryQuery])
 
   const fetchProducts = async () => {
     setLoading(true);
     try {
-      const url = searchQuery
-        ? `/api/products?search=${encodeURIComponent(searchQuery)}`
-        : '/api/products';
+      let url = '/api/products';
+      if (searchQuery) {
+        url = `/api/products?search=${encodeURIComponent(searchQuery)}`;
+      } else if (categoryQuery) {
+        url = `/api/products?category=${encodeURIComponent(categoryQuery)}`;
+      }
       const result = await axios.get(url);
       setProductList(result.data || []);
     } catch (e) {
@@ -36,25 +40,17 @@ function ProductsPageContent() {
 
   return (
     <div className='my-20'>
-      <div className='flex items-center justify-between mb-2'>
+      <div className='flex items-center justify-between mb-8 px-5'>
         <div>
           <h1 className='font-bold text-5xl'>
-            {searchQuery ? 'Search Results' : 'All Products'}
+            {searchQuery ? 'Search Results' : categoryQuery ? `${categoryQuery}` : 'All Products'}
           </h1>
           <p className='text-lg text-muted-foreground mt-2'>
             {searchQuery
               ? `Showing results for "${searchQuery}"`
-              : 'Browse our complete collection'}
+              : categoryQuery ? `Browse our premium ${categoryQuery} collection` : 'Browse our complete collection'}
           </p>
         </div>
-        {searchQuery && (
-          <a
-            href="/products"
-            className="text-sm text-primary hover:underline transition"
-          >
-            ← View all products
-          </a>
-        )}
       </div>
 
       <div className='grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-4 p-2 sm:p-5'>
@@ -79,7 +75,7 @@ function ProductsPageContent() {
             <p className='text-muted-foreground'>
               {searchQuery
                 ? `We couldn't find any products matching "${searchQuery}". Try a different search term.`
-                : 'No products are available at the moment.'}
+                : categoryQuery ? `No products available in the ${categoryQuery} category at the moment.` : 'No products are available at the moment.'}
             </p>
           </div>
         )}

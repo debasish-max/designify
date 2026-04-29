@@ -96,17 +96,18 @@ function ProductDetail() {
                                 <ChevronUp size={20} />
                             </Button>
                         )}
-                        
+
                         <div className='flex flex-col gap-3'>
-                            {product?.productImage?.slice(startIndex, startIndex + 4).map((img:any, index_offset:number) => {
-                               const actualIndex = startIndex + index_offset;
-                               return (
-                               <div key={actualIndex} 
-                               onClick={()=>setSelectedImageIndex(actualIndex)}
-                               className={`w-20 h-20 border-2 rounded-xl overflow-hidden cursor-pointer transition-all ${selectedImageIndex==actualIndex?'border-primary shadow-md':'border-gray-100 hover:border-gray-300'}`}>
-                                    <Image src={img.url} alt={product.title} width={80} height={80} className='w-full h-full object-cover' />
-                               </div>
-                            )})}
+                            {product?.productImage?.slice(startIndex, startIndex + 4).map((img: any, index_offset: number) => {
+                                const actualIndex = startIndex + index_offset;
+                                return (
+                                    <div key={actualIndex}
+                                        onClick={() => setSelectedImageIndex(actualIndex)}
+                                        className={`w-20 h-20 border-2 rounded-xl overflow-hidden cursor-pointer transition-all ${selectedImageIndex == actualIndex ? 'border-primary shadow-md' : 'border-gray-100 hover:border-gray-300'}`}>
+                                        <Image src={img.url} alt={product.title} width={80} height={80} className='w-full h-full object-cover' />
+                                    </div>
+                                )
+                            })}
                         </div>
 
                         {/* Down Arrow */}
@@ -116,13 +117,13 @@ function ProductDetail() {
                             </Button>
                         )}
                     </div>
-                    <div className='flex-1 border border-gray-100 rounded-[32px] flex items-center justify-center bg-white min-h-[450px] relative overflow-hidden group shadow-sm'>
+                    <div className='flex-1 border border-gray-100 rounded-[32px] flex items-center justify-center bg-white aspect-[4/3] relative overflow-hidden group shadow-sm p-4'>
                         {product ?
                             <div className="w-full h-full flex items-center justify-center">
                                 {product?.productImage?.[selectedImageIndex]?.url ? (
                                     <Image src={product.productImage[selectedImageIndex].url}
-                                        alt={product.title || 'Product Image'} width={600} height={600} 
-                                        className='w-full h-full object-cover transition-transform duration-500 group-hover:scale-110'/> 
+                                        alt={product.title || 'Product Image'} width={600} height={600}
+                                        className='w-full h-full object-contain transition-transform duration-500 group-hover:scale-105' />
                                 ) : (
                                     <div className="flex flex-col items-center justify-center text-muted-foreground w-full h-full bg-muted/20">
                                         <span className="text-sm">No Image Available</span>
@@ -140,13 +141,13 @@ function ProductDetail() {
                         <h2 className='font-bold text-3xl'>{product?.title}</h2>
                         <h2 className='font-bold text-3xl'>₹{product?.pricing}</h2>
                         <p className='text-gray-500 text-lg'>{product?.description}</p>
-                        
+
                         {product?.sizes && product.sizes.length > 0 && (
                             <div className="flex flex-col gap-3 my-4">
                                 <h3 className="text-sm font-black uppercase tracking-widest text-gray-400">Select Size</h3>
                                 <div className="flex flex-wrap gap-2">
                                     {product.sizes.map((size: string) => (
-                                        <button 
+                                        <button
                                             key={size}
                                             onClick={() => setSelectedSize(size)}
                                             className={`px-6 py-3 rounded-2xl text-sm font-black transition-all border-2 ${selectedSize === size ? 'bg-primary text-white border-primary shadow-lg shadow-primary/20 scale-105' : 'bg-white text-gray-600 border-gray-100 hover:border-gray-300'}`}
@@ -159,15 +160,7 @@ function ProductDetail() {
                         )}
 
                         <Button size={'lg'} onClick={() => router.push(`/product/${productId}/customize${selectedSize ? `?size=${selectedSize}` : ''}`)}>
-                                Customize
-                        </Button>
-                        {/* ✅ Buy Now button */}
-                        <Button size={'lg'} onClick={BuyNow}>
-                            Buy Now
-                        </Button>
-                        <Button size={'lg'} onClick={() => AddToCart()}
-                            variant={'outline'}>
-                            Add To Cart
+                            Customize
                         </Button>
                     </div>
                         : <div className='space-y-3'>
@@ -185,7 +178,7 @@ function ProductDetail() {
             </div>
 
             <PopularProducts />
-            <Footer/>
+            <Footer />
         </div>
     )
 }
