@@ -11,16 +11,26 @@ import {
     ArrowUpDown,
     MoreHorizontal,
     Globe,
-    Calendar
+    Calendar,
+    ChevronDown,
+    Check
 } from 'lucide-react'
 import Image from 'next/image'
 import { socket } from '@/lib/socket'
+import { motion, AnimatePresence } from 'framer-motion'
+
+const sortOptions = [
+    { id: 'latest', name: 'Latest' },
+    { id: 'oldest', name: 'Oldest' },
+    { id: 'name', name: 'Name: A-Z' },
+]
 
 function AdminUsers() {
     const [users, setUsers] = useState<any[]>([])
     const [loading, setLoading] = useState(true)
     const [searchQuery, setSearchQuery] = useState('')
     const [sortBy, setSortBy] = useState('latest')
+    const [isSortOpen, setIsSortOpen] = useState(false)
     const [onlineEmails, setOnlineEmails] = useState<string[]>([])
 
     useEffect(() => {
@@ -30,8 +40,12 @@ function AdminUsers() {
 
         socket.emit('get_presence')
 
+        const handleClickOutside = () => setIsSortOpen(false)
+        window.addEventListener('click', handleClickOutside)
+
         return () => {
             socket.off('presence_update')
+            window.removeEventListener('click', handleClickOutside)
         }
     }, [])
 
@@ -90,13 +104,43 @@ function AdminUsers() {
                         className="bg-transparent border-none outline-none text-sm font-bold w-full placeholder:text-gray-300"
                     />
                 </div>
-                <div className="flex items-center gap-4">
+                <div className="flex items-center gap-4 relative" onClick={(e) => e.stopPropagation()}>
                     <button
-                        onClick={() => setSortBy(prev => prev === 'latest' ? 'oldest' : prev === 'oldest' ? 'name' : 'latest')}
-                        className="flex items-center gap-2 px-5 py-3 bg-white border border-gray-100 rounded-2xl text-[10px] font-black uppercase tracking-widest text-gray-400 hover:text-primary transition"
+                        onClick={() => setIsSortOpen(!isSortOpen)}
+                        className="flex items-center gap-2 px-5 py-3 bg-white border border-gray-100 rounded-2xl text-[10px] font-black uppercase tracking-widest text-gray-900 hover:text-primary transition shadow-sm"
                     >
-                        <ArrowUpDown size={14} /> Sort by {sortBy}
+                        <ArrowUpDown size={14} className="text-primary" />
+                        <span>Sort by: <span className="text-gray-400">{sortOptions.find(opt => opt.id === sortBy)?.name}</span></span>
+                        <ChevronDown size={14} className={`transition-transform duration-200 ${isSortOpen ? 'rotate-180' : ''}`} />
                     </button>
+
+                    <AnimatePresence>
+                        {isSortOpen && (
+                            <motion.div
+                                initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                                animate={{ opacity: 1, y: 0, scale: 1 }}
+                                exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                                className="absolute right-0 top-full mt-2 w-48 bg-white border border-gray-100 rounded-2xl shadow-xl z-50 overflow-hidden p-1"
+                            >
+                                {sortOptions.map((option) => (
+                                    <button
+                                        key={option.id}
+                                        onClick={() => {
+                                            setSortBy(option.id)
+                                            setIsSortOpen(false)
+                                        }}
+                                        className={`flex items-center justify-between w-full px-4 py-2.5 text-[10px] font-black uppercase tracking-widest rounded-xl transition-colors
+                                            ${sortBy === option.id
+                                                ? 'bg-primary/5 text-primary'
+                                                : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900'}`}
+                                    >
+                                        {option.name}
+                                        {sortBy === option.id && <Check size={12} />}
+                                    </button>
+                                ))}
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
                 </div>
             </div>
 
@@ -146,8 +190,8 @@ function AdminUsers() {
                                     </td>
                                     <td className="px-10 py-7">
                                         <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest ${user.role === 'admin'
-                                                ? 'bg-purple-50 text-purple-600 border border-purple-100'
-                                                : 'bg-blue-50 text-blue-600 border border-blue-100'
+                                            ? 'bg-purple-50 text-purple-600 border border-purple-100'
+                                            : 'bg-blue-50 text-blue-600 border border-blue-100'
                                             }`}>
                                             <Shield size={12} className={user.role === 'admin' ? 'animate-pulse' : ''} />
                                             {user.role}
@@ -161,8 +205,8 @@ function AdminUsers() {
                                     </td>
                                     <td className="px-10 py-7 text-right">
                                         <span className={`px-4 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest ${onlineEmails.includes(user.email)
-                                                ? 'bg-green-50 text-green-600 animate-pulse'
-                                                : 'bg-gray-100 text-gray-400'
+                                            ? 'bg-green-50 text-green-600 animate-pulse'
+                                            : 'bg-gray-100 text-gray-400'
                                             }`}>
                                             {onlineEmails.includes(user.email) ? 'Online' : 'Offline'}
                                         </span>
