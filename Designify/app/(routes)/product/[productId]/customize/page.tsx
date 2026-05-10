@@ -662,8 +662,16 @@ export default function CustomizePage() {
                     </div>
 
                     <div className="p-8 bg-white border-t border-gray-50 mt-auto">
-                        <Button onClick={handleSave} className="w-full py-8 rounded-[24px] bg-primary text-white font-black text-md shadow-2xl shadow-primary/30 hover:-translate-y-1 transition active:translate-y-0 group">
-                            <Save size={18} className="mr-3 group-hover:rotate-12 transition-transform" /> Save Design
+                        <Button 
+                            onClick={handleSave} 
+                            disabled={canvasLayers.length === 0}
+                            className={`w-full py-8 rounded-[24px] font-black text-md shadow-2xl transition group ${
+                                canvasLayers.length === 0 
+                                ? 'bg-gray-200 text-gray-400 cursor-not-allowed shadow-none' 
+                                : 'bg-primary text-white shadow-primary/30 hover:-translate-y-1 active:translate-y-0'
+                            }`}
+                        >
+                            <Save size={18} className={`mr-3 ${canvasLayers.length > 0 ? 'group-hover:rotate-12' : ''} transition-transform`} /> Save Design
                         </Button>
                     </div>
                 </aside>
