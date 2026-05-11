@@ -26,14 +26,14 @@ export async function GET(req: NextRequest) {
             return NextResponse.json(result[0] || null);
         }
 
-        let query = db.select().from(ProductsTable);
+        let query = db.select().from(ProductsTable).$dynamic();
 
         if (isPopular === '1') {
-            query = query.where(eq(ProductsTable.isPopular, true)) as any;
+            query = query.where(eq(ProductsTable.isPopular, true));
         } else if (category) {
-            query = query.where(eq(ProductsTable.categoryName, category)) as any;
+            query = query.where(eq(ProductsTable.categoryName, category));
         } else if (search) {
-            query = query.where(ilike(ProductsTable.title, `%${search}%`)) as any;
+            query = query.where(ilike(ProductsTable.title, `%${search}%`));
         }
 
         const products = await query;

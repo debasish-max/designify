@@ -60,8 +60,13 @@ function Provider({
             return;
           }
         }
-      } catch (e) {
-        console.error('Auth initialization error:', e);
+      } catch (e: any) {
+        if (e.response?.status === 401) {
+          localStorage.removeItem('tokenResponse');
+          console.warn('Session expired. Token removed.');
+        } else {
+          console.error('Auth initialization error:', e);
+        }
       }
       setUserDetail(null as any); // Set to null to indicate loaded but not authenticated
     };

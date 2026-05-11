@@ -30,9 +30,14 @@ function PopularProducts() {
   }, [])
 
   const GetPopularProducts = async () => {
-    // Fetch all products so we actually have items to show, then we'll slice to 4
-    const result = await axios.get('/api/products');
-    setProductList(result.data);
+    try {
+      // Fetch all products so we actually have items to show, then we'll slice to 4
+      const result = await axios.get('/api/products');
+      setProductList(result.data);
+    } catch (e) {
+      console.error('Error fetching popular products:', e);
+      setProductList([]);
+    }
   }
 
   return (

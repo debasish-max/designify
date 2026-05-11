@@ -21,8 +21,13 @@ function Categories() {
   }, [])
 
   const GetCategoryList = async () => {
-    const result = await axios.get('/api/categories');
-    setCategoryList(result?.data)
+    try {
+      const result = await axios.get('/api/categories');
+      setCategoryList(result?.data)
+    } catch (e) {
+      console.error('Error fetching categories:', e);
+      setCategoryList([]);
+    }
   }
 
   return (
