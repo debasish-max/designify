@@ -41,26 +41,36 @@ function PopularProducts() {
   }
 
   return (
-    <div className='mt-20 px-5'>
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-8 gap-4">
-        <h2 className='font-black text-3xl text-gray-900 tracking-tighter'>Featured Products</h2>
-        <Link href="/products" className="text-[10px] font-black uppercase tracking-widest text-primary bg-primary/5 hover:bg-primary/10 px-6 py-3 rounded-full transition-colors flex items-center gap-2 w-fit">
-          View All Products <span className="text-sm leading-none">→</span>
-        </Link>
-      </div>
-
-      <div className='grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6'>
-        {productList?.slice(0, 4).map((product: Product) => (
-          <ProductCard product={product} key={product.documentId} />
-        ))}
-      </div>
-
-      {(!productList || productList.length === 0) && (
-        <div className="w-full py-20 flex flex-col items-center justify-center text-gray-400 bg-gray-50 rounded-[32px] mt-4 border border-dashed border-gray-200">
-          <span className="text-xs font-black uppercase tracking-widest">No products found</span>
+    <section className="bg-gray-50/40 border-t border-gray-100 py-32 px-6 relative">
+      <div className="max-w-7xl mx-auto">
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-16 gap-6">
+          <div>
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-orange-100 text-orange-600 text-[11px] font-black tracking-widest uppercase mb-6 w-fit">
+              Bestsellers
+            </div>
+            <h2 className="text-4xl md:text-5xl font-black text-gray-900 tracking-tight leading-[1.1]">
+              Featured Products
+            </h2>
+          </div>
+          <Link href="/products" className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-white border border-gray-200 text-gray-900 rounded-xl font-bold shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all group w-fit">
+            View All Products 
+            <span className="text-sm leading-none group-hover:translate-x-1 transition-transform">→</span>
+          </Link>
         </div>
-      )}
-    </div>
+
+        <div className='grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6'>
+          {productList?.slice(0, 4).map((product: Product) => (
+            <ProductCard product={product} key={product.documentId} />
+          ))}
+        </div>
+
+        {(!productList || productList.length === 0) && (
+          <div className="w-full py-24 flex flex-col items-center justify-center text-gray-400 bg-white rounded-[32px] mt-4 border border-dashed border-gray-200">
+            <span className="text-sm font-black uppercase tracking-widest">No products found</span>
+          </div>
+        )}
+      </div>
+    </section>
   )
 }
 

@@ -11,27 +11,24 @@ type Props = {
 
 function ProductCard({product}: Props) {
   return (
-    <div className='border rounded-xl p-2 sm:p-4 flex flex-col justify-between items-center text-center cursor-pointer hover:shadow-lg transition-shadow duration-300 h-full'>
-      <div className="w-full h-[120px] sm:h-[180px] flex items-center justify-center">
+    <Link href={'/product/' + product?.documentId} className='group bg-white border border-gray-100 rounded-[32px] p-5 sm:p-6 flex flex-col justify-start items-center text-center cursor-pointer shadow-sm hover:shadow-[0_20px_60px_-15px_rgba(0,0,0,0.08)] transition-all duration-500 hover:-translate-y-2 h-full block'>
+      <div className="w-full h-[160px] sm:h-[220px] flex items-center justify-center bg-gray-50/80 rounded-[24px] mb-5 p-4 group-hover:bg-orange-50/50 transition-colors duration-500">
         {product?.productImage?.[0]?.url ? (
           <Image 
             src={product.productImage[0].url} 
             alt={product.title || 'Product Image'} 
-            width={150} 
-            height={150}
-            className='max-h-full w-auto object-contain'
+            width={200} 
+            height={200}
+            className='max-h-full w-auto object-contain group-hover:scale-105 transition-transform duration-500 drop-shadow-sm'
           />
         ) : (
-          <div className="w-[120px] h-[120px] sm:w-[150px] sm:h-[150px] bg-muted flex flex-col items-center justify-center rounded-lg border border-dashed">
-            <span className="text-xs text-muted-foreground mt-2">No Image</span>
+          <div className="w-[120px] h-[120px] sm:w-[150px] sm:h-[150px] flex flex-col items-center justify-center border border-dashed border-gray-200 rounded-2xl">
+            <span className="text-[10px] font-black uppercase tracking-widest text-gray-400 mt-2">No Image</span>
           </div>
         )}
       </div>
-      <h2 className='font-medium text-xs sm:text-base mt-2 line-clamp-2 min-h-[32px] sm:min-h-[48px]'>{product.title}</h2>
-      <Link href={'/product/' + product?.documentId} className='w-full'>
-          <Button className='w-full mt-2 text-xs sm:text-sm py-1.5 sm:py-2 flex items-center justify-center gap-1 sm:gap-2'> <Palette size={14} className='sm:w-[18px] sm:h-[18px]' /> Customize</Button>
-      </Link>
-    </div>
+      <h3 className='font-bold text-sm sm:text-base text-gray-900 line-clamp-2 leading-tight px-2'>{product.title}</h3>
+    </Link>
   )
 }
 

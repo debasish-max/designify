@@ -1,226 +1,85 @@
 "use client";
 
-import { useLayoutEffect, useRef, useState, useEffect } from "react";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { useRef, useState, useEffect } from "react";
+import { motion, useScroll, useTransform } from "framer-motion";
+import { Sparkles, Layers, Paintbrush, Zap } from "lucide-react";
+import Image from "next/image";
+
+const products = [
+  {
+    id: "tshirts",
+    img: "/tshirt.png",
+    label: "Premium T-Shirts",
+    desc: "Wear your creativity with our high-quality, ultra-soft cotton tees.",
+    icon: <Paintbrush className="w-6 h-6 text-orange-500" />,
+    area: { top: "38%", width: "36%", height: "28%" },
+  },
+  {
+    id: "posters",
+    img: "/poster.png",
+    label: "Wall Posters",
+    desc: "Make a statement in any room with museum-grade matte print posters.",
+    icon: <Layers className="w-6 h-6 text-purple-500" />,
+    area: { top: "22%", width: "44%", height: "36%" },
+  },
+  {
+    id: "sweatshirts",
+    img: "/banner.png",
+    label: "Cozy Sweatshirts",
+    desc: "Warm, stylish, and customized entirely by you. Perfect for every season.",
+    icon: <Zap className="w-6 h-6 text-blue-500" />,
+    area: { top: "30%", width: "46%", height: "30%" },
+  },
+];
 
 export default function ScrollShowcase() {
-  const wrapperRef = useRef<HTMLDivElement>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
-  const [isMobile, setIsMobile] = useState(false);
+  const [activeIndex, setActiveIndex] = useState(0);
+  const blockRefs = useRef<(HTMLDivElement | null)[]>([]);
 
+  // Calculate which item should be active using IntersectionObserver
   useEffect(() => {
-    const check = () => setIsMobile(window.innerWidth < 768);
-    check();
-    window.addEventListener("resize", check);
-    return () => window.removeEventListener("resize", check);
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            const index = Number(entry.target.getAttribute("data-index"));
+            setActiveIndex(index);
+          }
+        });
+      },
+      { rootMargin: "-45% 0px -45% 0px" }
+    );
+
+    blockRefs.current.forEach((ref) => {
+      if (ref) observer.observe(ref);
+    });
+
+    return () => observer.disconnect();
   }, []);
 
-  useLayoutEffect(() => {
-    gsap.registerPlugin(ScrollTrigger);
-
-    // ✅ Skip horizontal scroll on mobile completely
-    if (window.innerWidth < 768) return;
-
-    const ctx = gsap.context(() => {
-      const container = containerRef.current!;
-      const wrapper = wrapperRef.current!;
-
-      const tween = gsap.to(container, {
-        xPercent: -100 * (container.children.length - 1) / container.children.length,
-        ease: "none",
-        scrollTrigger: {
-          trigger: wrapper,
-          pin: true,
-          scrub: 0.05,
-          snap: 1 / (container.children.length - 1),
-          end: () => "+=" + container.offsetWidth,
-          invalidateOnRefresh: true,
-          anticipatePin: 1,
-          fastScrollEnd: true,
-          preventOverlaps: true,
-        },
-      });
-
-      gsap.utils.toArray<HTMLElement>(".panel").forEach((panel) => {
-        const tl = gsap.timeline({
-          scrollTrigger: {
-            trigger: panel,
-            containerAnimation: tween,
-            start: "left 70%",
-            toggleActions: "play none none reverse",
-          },
-        });
-
-        tl.fromTo(
-          panel.querySelectorAll(".anim-text"),
-          { opacity: 0, y: 30, skewY: 2 },
-          { opacity: 1, y: 0, skewY: 0, duration: 0.5, stagger: 0.1, ease: "power3.out" }
-        ).fromTo(
-          panel.querySelectorAll(".anim-card"),
-          { opacity: 0, scale: 0.85, rotateY: 12 },
-          { opacity: 1, scale: 1, rotateY: 0, duration: 0.6, ease: "back.out(1.5)" },
-          "-=0.3"
-        );
-      });
-
-      gsap.utils.toArray<HTMLElement>(".tilt-card").forEach((card) => {
-        const inner = card.querySelector(".tilt-inner") as HTMLElement;
-        card.addEventListener("mousemove", (e: MouseEvent) => {
-          const rect = card.getBoundingClientRect();
-          const x = (e.clientX - rect.left) / rect.width - 0.5;
-          const y = (e.clientY - rect.top) / rect.height - 0.5;
-          gsap.to(inner, {
-            rotateY: x * 15,
-            rotateX: -y * 15,
-            transformPerspective: 900,
-            duration: 0.15,
-            ease: "power1.out",
-          });
-        });
-        card.addEventListener("mouseleave", () => {
-          gsap.to(inner, { rotateX: 0, rotateY: 0, duration: 0.5, ease: "elastic.out(1, 0.5)" });
-        });
-      });
-
-    }, wrapperRef);
-
-    return () => ctx.revert();
-  }, [isMobile]);
-
-  const products = [
-    {
-      img: "/tshirt.png",
-      label: "T-Shirts",
-      desc: "Wear your creativity",
-      area: { top: "38%", width: "36%", height: "28%" },
-    },
-    {
-      img: "/poster.png",
-      label: "Posters",
-      desc: "Make a statement",
-      area: { top: "22%", width: "44%", height: "36%" },
-    },
-    {
-      img: "/banner.png",
-      label: "Sweat-Shirt",
-      desc: "Create with your imagination",
-      area: { top: "30%", width: "46%", height: "30%" },
-    },
-  ];
-
-  // ✅ MOBILE LAYOUT - simple vertical scroll
-  if (isMobile) {
-    return (
-      <section className="bg-white py-12 px-6">
-        {/* Intro */}
-        <div className="mb-10">
-          <p className="text-xs font-semibold tracking-widest text-primary uppercase mb-2">
-            Real-time preview
-          </p>
-          <h1 className="text-4xl font-bold leading-none">See Your</h1>
-          <h1 className="text-4xl font-bold leading-none text-primary">Design</h1>
-          <h1 className="text-4xl font-bold leading-none">Come Alive</h1>
-          <p className="text-gray-500 mt-2 text-sm">
-            Customize anything before printing.
-          </p>
-        </div>
-
-        {/* Products */}
-        {products.map((item, i) => (
-          <div key={i} className="flex items-center gap-4 mb-10">
-            <div className="relative w-[140px] flex-shrink-0">
-              <img
-                src={item.img}
-                alt={item.label}
-                className="w-full h-auto object-contain drop-shadow-lg"
-              />
-              <div
-                className="absolute left-1/2 overflow-hidden"
-                style={{
-                  top: item.area.top,
-                  transform: "translateX(-50%)",
-                  width: item.area.width,
-                  height: item.area.height,
-                }}
-              >
-                <img
-                  src="/design.png"
-                  alt="design"
-                  className="w-full h-full object-contain"
-                />
-              </div>
-            </div>
-            <div>
-              <p className="text-xs font-semibold tracking-widest text-primary uppercase mb-1">
-                0{i + 1}
-              </p>
-              <h2 className="text-2xl font-bold leading-tight">{item.label}</h2>
-              <p className="text-gray-500 mt-1 text-sm">{item.desc}</p>
-            </div>
-          </div>
-        ))}
-
-        {/* Outro */}
-        <div className="mt-4">
-          <p className="text-xs font-semibold tracking-widest text-primary uppercase mb-2">
-            All in one place
-          </p>
-          <h2 className="text-4xl font-bold leading-none">Print Anything</h2>
-          <h2 className="text-4xl font-bold leading-none text-primary">You Want</h2>
-          <p className="text-gray-500 mt-2 text-sm">
-            T-shirts, posters, banners — customized and delivered to you.
-          </p>
-        </div>
-      </section>
-    );
-  }
-
-  // ✅ DESKTOP LAYOUT - horizontal scroll
   return (
-    <section ref={wrapperRef} className="overflow-hidden bg-white">
-      <div
-        ref={containerRef}
-        className="flex h-screen will-change-transform"
-        style={{ width: `${(products.length + 2) * 100}vw` }}
-      >
-        {/* Intro Panel */}
-        <div className="panel w-screen h-screen flex-shrink-0 flex items-center px-6 md:px-14 lg:px-20">
-          <div className="max-w-xl">
-            <p className="anim-text text-xs font-semibold tracking-widest text-primary uppercase mb-2">
-              Real-time preview
-            </p>
-            <h1 className="anim-text text-4xl md:text-6xl lg:text-7xl font-bold leading-none">
-              See Your
-            </h1>
-            <h1 className="anim-text text-4xl md:text-6xl lg:text-7xl font-bold leading-none text-primary">
-              Design
-            </h1>
-            <h1 className="anim-text text-4xl md:text-6xl lg:text-7xl font-bold leading-none">
-              Come Alive
-            </h1>
-            <p className="anim-text text-gray-500 mt-2 text-sm md:text-base">
-              Customize anything before printing. Scroll to explore →
-            </p>
+    <section className="bg-white relative border-t border-gray-100">
+      {/* Subtle Design Grid Background */}
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808008_1px,transparent_1px),linear-gradient(to_bottom,#80808008_1px,transparent_1px)] bg-[size:24px_24px]"></div>
+
+      {/* Mobile Layout (Standard Flow) */}
+      <div className="md:hidden py-16 px-6">
+        <div className="mb-12 text-center">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-orange-100 text-orange-600 text-[11px] font-black tracking-widest uppercase mb-4">
+            <Sparkles size={14} className="fill-orange-600" /> Real-time preview
           </div>
+          <h2 className="text-4xl font-black text-gray-900 leading-[1.1]">
+            Premium Custom <br /> <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-purple-600">Products</span>
+          </h2>
         </div>
 
-        {/* Product Panels */}
-        {products.map((item, i) => (
-          <div
-            key={i}
-            className="panel w-screen h-screen flex-shrink-0 flex items-center justify-center gap-3 md:gap-4 px-4"
-          >
-            <div className="anim-card tilt-card w-[160px] sm:w-[200px] md:w-[260px] lg:w-[300px]">
-              <div className="tilt-inner relative select-none">
-                <img
-                  src={item.img}
-                  alt={item.label}
-                  className="w-full h-auto object-contain block drop-shadow-xl"
-                  draggable={false}
-                />
+        <div className="flex flex-col gap-16">
+          {products.map((item, i) => (
+            <div key={i} className="flex flex-col items-center text-center gap-6">
+              <div className="relative w-[280px] h-[280px] bg-white rounded-[32px] shadow-sm flex items-center justify-center p-6 border border-gray-100">
+                <img src={item.img} alt={item.label} className="w-full h-full object-contain drop-shadow-md" />
                 <div
-                  className="absolute left-1/2 overflow-hidden"
+                  className="absolute left-1/2 overflow-hidden mix-blend-multiply opacity-90"
                   style={{
                     top: item.area.top,
                     transform: "translateX(-50%)",
@@ -228,46 +87,109 @@ export default function ScrollShowcase() {
                     height: item.area.height,
                   }}
                 >
-                  <img
-                    src="/design.png"
-                    alt="design"
-                    className="w-full h-full object-contain"
-                    draggable={false}
-                  />
+                  <img src="/design.png" alt="design" className="w-full h-full object-contain" />
                 </div>
               </div>
+              <div>
+                <div className="w-12 h-12 bg-white rounded-2xl shadow-sm flex items-center justify-center mx-auto mb-4 border border-gray-100">
+                  {item.icon}
+                </div>
+                <h3 className="text-2xl font-black text-gray-900">{item.label}</h3>
+                <p className="text-gray-500 mt-2 leading-relaxed">{item.desc}</p>
+              </div>
             </div>
+          ))}
+        </div>
+      </div>
 
-            <div>
-              <p className="anim-text text-xs font-semibold tracking-widest text-primary uppercase mb-1">
-                0{i + 1}
-              </p>
-              <h2 className="anim-text text-3xl md:text-4xl lg:text-5xl font-bold leading-tight">
-                {item.label}
-              </h2>
-              <p className="anim-text text-gray-500 mt-1 text-sm md:text-base">
-                {item.desc}
-              </p>
+      {/* Desktop Sticky Scroll Layout */}
+      <div className="hidden md:flex items-start relative pb-12">
+        {/* Left Side: Sticky Image Showcase */}
+        <div className="w-1/2 sticky top-0 h-screen flex items-center justify-center p-12 relative z-10 overflow-hidden">
+
+          {/* Decorative Ambient Background */}
+          <div className="absolute top-[20%] left-[20%] w-[400px] h-[400px] bg-orange-400/10 rounded-full mix-blend-multiply filter blur-[80px]"></div>
+          <div className="absolute bottom-[20%] right-[20%] w-[400px] h-[400px] bg-purple-400/10 rounded-full mix-blend-multiply filter blur-[80px]"></div>
+
+          <div className="relative z-10 w-full max-w-[500px] aspect-square bg-white/60 backdrop-blur-2xl rounded-[40px] shadow-[0_20px_60px_-15px_rgba(0,0,0,0.05)] border border-white flex items-center justify-center overflow-hidden p-12">
+            {products.map((item, i) => (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                animate={{
+                  opacity: activeIndex === i ? 1 : 0,
+                  scale: activeIndex === i ? 1 : 0.9,
+                  y: activeIndex === i ? 0 : 20,
+                  pointerEvents: activeIndex === i ? "auto" : "none"
+                }}
+                transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+                className="absolute inset-0 flex items-center justify-center p-12"
+              >
+                <div className="relative w-full h-full flex items-center justify-center">
+                  <img
+                    src={item.img}
+                    alt={item.label}
+                    className="w-full h-full object-contain drop-shadow-xl"
+                  />
+                  <div
+                    className="absolute left-1/2 overflow-hidden mix-blend-multiply opacity-90"
+                    style={{
+                      top: item.area.top,
+                      transform: "translateX(-50%)",
+                      width: item.area.width,
+                      height: item.area.height,
+                    }}
+                  >
+                    <img
+                      src="/design.png"
+                      alt="design"
+                      className="w-full h-full object-contain"
+                    />
+                  </div>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+
+        {/* Right Side: Scrolling Content */}
+        <div className="w-1/2 relative z-10 py-[30vh]">
+          {products.map((item, i) => (
+            <div
+              key={i}
+              ref={(el) => { blockRefs.current[i] = el; }}
+              data-index={i}
+              className={`h-[40vh] flex flex-col justify-center px-16 xl:px-24 transition-all duration-500 ${activeIndex === i ? 'opacity-100 scale-100' : 'opacity-20 scale-95'}`}
+            >
+              <motion.div
+                initial={{ opacity: 0, y: 40 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: false, amount: 0.5 }}
+                transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+              >
+                {/* Intro Badge only on first item */}
+                {i === 0 && (
+                  <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-orange-100 text-orange-600 text-[11px] font-black tracking-widest uppercase mb-8 shadow-sm">
+                    <Sparkles size={14} className="fill-orange-600" />
+                    Real-Time Preview
+                  </div>
+                )}
+
+                <div className="w-14 h-14 bg-white rounded-2xl shadow-sm border border-gray-100 flex items-center justify-center mb-6">
+                  {item.icon}
+                </div>
+
+                <h2 className="text-5xl lg:text-6xl font-black text-gray-900 leading-[1.1] mb-6">
+                  {item.label}
+                </h2>
+
+                <p className="text-lg lg:text-xl text-gray-600 leading-relaxed max-w-md">
+                  {item.desc}
+                </p>
+
+              </motion.div>
             </div>
-          </div>
-        ))}
-
-        {/* Outro Panel */}
-        <div className="panel w-screen h-screen flex-shrink-0 flex items-center px-6 md:px-14 lg:px-20">
-          <div className="max-w-xl">
-            <p className="anim-text text-xs font-semibold tracking-widest text-primary uppercase mb-2">
-              All in one place
-            </p>
-            <h2 className="anim-text text-4xl md:text-6xl lg:text-7xl font-bold leading-none">
-              Print Anything
-            </h2>
-            <h2 className="anim-text text-4xl md:text-6xl lg:text-7xl font-bold leading-none text-primary">
-              You Want
-            </h2>
-            <p className="anim-text text-gray-500 mt-2 text-sm md:text-base">
-              T-shirts, posters, banners — customized and delivered to you.
-            </p>
-          </div>
+          ))}
         </div>
       </div>
     </section>
