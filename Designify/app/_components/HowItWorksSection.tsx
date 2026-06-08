@@ -29,7 +29,7 @@ export default function HowItWorksSection() {
     <section className="bg-gray-50/40 border-t border-gray-100 py-32 px-6 relative overflow-hidden">
       <div className="max-w-7xl mx-auto relative z-10">
         {/* Heading */}
-        <div className="text-center mb-24">
+        <div className="flex flex-col items-start text-left mb-24 max-w-3xl">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -52,7 +52,7 @@ export default function HowItWorksSection() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ delay: 0.2 }}
-            className="text-lg md:text-xl text-gray-500 mt-6 max-w-3xl mx-auto leading-relaxed"
+            className="text-lg md:text-xl text-gray-500 mt-6 leading-relaxed"
           >
             Transform your ideas into high-quality custom merchandise in just three simple steps. Whether you're building a brand, outfitting a team, or creating a unique gift, our platform makes the entire process seamless from start to finish.
           </motion.p>

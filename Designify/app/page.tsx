@@ -8,26 +8,34 @@ import ThreeDSection from "./_components/ThreeDSection";
 import HowItWorksSection from "./_components/HowItWorksSection";
 import ScrollShowcase from "./_components/ScrollShowcase";
 
+import AestheticGallery from "./_components/AestheticGallery";
+
 export default function Home() {
   return (
-   <div>
+    <div>
 
-    {/* Hero */}
-    <Hero/>
-    
-    <ScrollShowcase/>
+      {/* Hero */}
+      <Hero />
 
-    {/* How it works */}
-    <HowItWorksSection/>
+      <ScrollShowcase />
 
-    {/* Category list*/}
-    <Categories/>
+      {/* How it works */}
+      <HowItWorksSection />
 
-    {/* Product list*/}
-    <PopularProducts/>
-<ThreeDSection/>
-    {/* Footer */}
-    <Footer/>
-   </div>
+      {/* Category list*/}
+      <Categories />
+
+      {/* Product list*/}
+      <PopularProducts />
+
+      {/* Real Life Photo Gallery */}
+      <AestheticGallery />
+
+      {/* Why Choose Us */}
+      <ThreeDSection />
+
+      {/* Footer */}
+      <Footer />
+    </div>
   );
 }
