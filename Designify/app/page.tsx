@@ -1,14 +1,14 @@
-import Image from "next/image";
+import dynamic from "next/dynamic";
 
 import Hero from "./_components/Hero";
-import Categories from "./_components/Categories";
-import PopularProducts from "./_components/PopularProducts";
-import Footer from "./_components/Footer";
-import ThreeDSection from "./_components/ThreeDSection";
-import HowItWorksSection from "./_components/HowItWorksSection";
-import ScrollShowcase from "./_components/ScrollShowcase";
 
-import AestheticGallery from "./_components/AestheticGallery";
+const Categories = dynamic(() => import("./_components/Categories"));
+const PopularProducts = dynamic(() => import("./_components/PopularProducts"));
+const Footer = dynamic(() => import("./_components/Footer"));
+const ThreeDSection = dynamic(() => import("./_components/ThreeDSection"));
+const HowItWorksSection = dynamic(() => import("./_components/HowItWorksSection"));
+const ScrollShowcase = dynamic(() => import("./_components/ScrollShowcase"));
+const AestheticGallery = dynamic(() => import("./_components/AestheticGallery"));
 
 export default function Home() {
   return (
