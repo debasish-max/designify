@@ -9,6 +9,7 @@ import React, { useContext, useState } from 'react'
 import { toast } from 'react-toastify'
 import { Button } from '@/components/ui/Button'
 import Footer from '@/app/_components/Footer'
+import Image from 'next/image'
 
 type CartItem = {
     documentId: string,
@@ -84,9 +85,11 @@ function Carts() {
                                 <li key={cartItem.documentId ?? index} className="flex items-center gap-4">
                                     {/* ✅ Product image */}
                                     {cartItem.products[0]?.productImage?.[0]?.url ? (
-                                        <img
+                                        <Image
                                             src={cartItem.products[0].productImage[0].url}
                                             alt=""
+                                            width={64}
+                                            height={64}
                                             className="size-16 rounded-sm object-cover"
                                         />
                                     ) : (
@@ -96,9 +99,11 @@ function Carts() {
                                     )}
                                     {/* ✅ Design image - only show if exists */}
                                     {cartItem.design && (
-                                        <img
+                                        <Image
                                             src={cartItem.design}
                                             alt="design"
+                                            width={64}
+                                            height={64}
                                             className="size-16 rounded-sm object-cover"
                                         />
                                     )}

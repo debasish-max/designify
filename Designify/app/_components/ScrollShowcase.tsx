@@ -77,7 +77,7 @@ export default function ScrollShowcase() {
           {products.map((item, i) => (
             <div key={i} className="flex flex-col items-center text-center gap-6">
               <div className="relative w-[280px] h-[280px] bg-white rounded-[32px] shadow-sm flex items-center justify-center p-6 border border-gray-100">
-                <img src={item.img} alt={item.label} className="w-full h-full object-contain drop-shadow-md" />
+                <Image src={item.img} alt={item.label} width={280} height={280} className="w-full h-full object-contain drop-shadow-md" />
                 <div
                   className="absolute left-1/2 overflow-hidden mix-blend-multiply opacity-90"
                   style={{
@@ -87,7 +87,7 @@ export default function ScrollShowcase() {
                     height: item.area.height,
                   }}
                 >
-                  <img src="/design.png" alt="design" className="w-full h-full object-contain" />
+                  <Image src="/design.png" alt="design" fill className="object-contain" />
                 </div>
               </div>
               <div>
@@ -126,10 +126,11 @@ export default function ScrollShowcase() {
                 className="absolute inset-0 flex items-center justify-center p-12"
               >
                 <div className="relative w-full h-full flex items-center justify-center">
-                  <img
+                  <Image
                     src={item.img}
                     alt={item.label}
-                    className="w-full h-full object-contain drop-shadow-xl"
+                    fill
+                    className="object-contain drop-shadow-xl"
                   />
                   <div
                     className="absolute left-1/2 overflow-hidden mix-blend-multiply opacity-90"
@@ -140,10 +141,11 @@ export default function ScrollShowcase() {
                       height: item.area.height,
                     }}
                   >
-                    <img
+                    <Image
                       src="/design.png"
                       alt="design"
-                      className="w-full h-full object-contain"
+                      fill
+                      className="object-contain"
                     />
                   </div>
                 </div>

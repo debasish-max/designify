@@ -1,4 +1,5 @@
 import React from 'react'
+import Image from 'next/image'
 
 function Footer() {
   return (
@@ -7,7 +8,7 @@ function Footer() {
     <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
       <div>
         <div className="flex justify-center text-teal-600 sm:justify-start dark:text-teal-300">
-           <img src={'/b.png'} alt='Logo' width={175} height={200} />
+           <Image src={'/b.png'} alt='Logo' width={175} height={200} />
         </div>
 
         <p className="mt-6 max-w-md text-center leading-relaxed text-gray-500 sm:max-w-xs sm:text-left dark:text-gray-400">

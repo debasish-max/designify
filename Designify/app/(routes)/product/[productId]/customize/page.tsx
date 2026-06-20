@@ -533,10 +533,11 @@ export default function CustomizePage() {
                         <div className={`relative ${viewMode === 'preview' ? 'flex' : 'hidden'} w-[600px] h-[600px] items-center justify-center bg-white rounded-[32px] shadow-2xl p-4 transition-all overflow-hidden`}>
                             <div className="relative w-full h-full flex items-center justify-center">
                                 {product?.productImage?.[selectedVariant] && (
-                                    <img 
+                                    <Image 
                                         src={product.productImage[selectedVariant].url}
                                         alt="Preview"
-                                        className="w-full h-full object-contain"
+                                        fill
+                                        className="object-contain"
                                     />
                                 )}
                                 {/* Overlay Design */}
@@ -551,10 +552,12 @@ export default function CustomizePage() {
                                             mixBlendMode: 'multiply'
                                         }}
                                     >
-                                        <img 
+                                        <Image 
                                             src={previewUrl} 
                                             alt="Live Design Overlay"
-                                            className="w-full h-full object-fill"
+                                            fill
+                                            unoptimized
+                                            className="object-fill"
                                         />
                                     </div>
                                 )}
